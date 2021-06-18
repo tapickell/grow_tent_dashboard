@@ -1,6 +1,6 @@
-defmodule GrowTent do
+defmodule GrowTentFirmware do
   @moduledoc """
-  Documentation for GrowTent.
+  Documentation for GrowTentFirmware.
   """
 
   @doc """
@@ -8,7 +8,7 @@ defmodule GrowTent do
 
   ## Examples
 
-      iex> GrowTent.hello
+      iex> GrowTentFirmware.hello
       :world
 
   """

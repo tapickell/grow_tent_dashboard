@@ -1,7 +1,7 @@
-defmodule GrowTent.MixProject do
+defmodule GrowTentFirmware.MixProject do
   use Mix.Project
 
-  @app :grow_tent
+  @app :grow_tent_firmware
   @version "0.1.0"
   @all_targets [:rpi, :rpi0, :rpi2, :rpi3, :rpi3a, :rpi4, :bbb, :osd32mp1, :x86_64]
 
@@ -22,7 +22,7 @@ defmodule GrowTent.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      mod: {GrowTent.Application, []},
+      mod: {GrowTentFirmware.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -35,6 +35,7 @@ defmodule GrowTent.MixProject do
       {:shoehorn, "~> 0.7.0"},
       {:ring_logger, "~> 0.8.1"},
       {:toolshed, "~> 0.2.13"},
+      {:circuits_i2c, "~> 0.3.8"},
       {:grow_tent, path: "../grow_tent", targets: @all_targets, env: Mix.env()},
 
       # Dependencies for all targets except :host

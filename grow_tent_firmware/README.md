@@ -1,4 +1,4 @@
-# GrowTent
+# GrowTentFirmware
 
 **TODO: Add description**
 

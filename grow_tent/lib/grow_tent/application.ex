@@ -7,8 +7,6 @@ defmodule GrowTent.Application do
 
   def start(_type, _args) do
     children = [
-      # Start the Ecto repository
-      GrowTent.Repo,
       # Start the Telemetry supervisor
       GrowTentWeb.Telemetry,
       # Start the PubSub system

@@ -20,7 +20,7 @@ defmodule GrowTent.MixProject do
   def application do
     [
       mod: {GrowTent.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :crypto, :os_mon, :phoenix_ecto]
     ]
   end
 
@@ -35,9 +35,8 @@ defmodule GrowTent.MixProject do
     [
       {:phoenix, "~> 1.5.9"},
       {:phoenix_ecto, "~> 4.1"},
-      {:ecto_sql, "~> 3.4"},
-      {:postgrex, ">= 0.0.0"},
       {:phoenix_live_view, "~> 0.15.1"},
+      {:ecto, "~> 3.5.4"},
       {:floki, ">= 0.30.0", only: :test},
       {:phoenix_html, "~> 2.11"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
