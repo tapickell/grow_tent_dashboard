@@ -4,7 +4,6 @@
 # remember to add this file to your .gitignore.
 use Mix.Config
 
-
 config :grow_tent, GrowTentWeb.Endpoint,
   http: [
     port: String.to_integer(System.get_env("PORT") || "4000"),
