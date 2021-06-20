@@ -3,8 +3,8 @@ defmodule GrowTent.Sensors.Scd30 do
 
   @cmd_continuous_measurement 0x0010
   @cmd_set_measurement_interval 0x4600
-  @cmd_get_data_ready 0x0202
-  @cmd_read_measurement 0x0300
+  @cmd_get_data_ready <<0x02, 0x02>>
+  @cmd_read_measurement <<0x03, 0x00>>
   @cmd_automatic_self_calibration 0x5306
   @cmd_set_forced_recalibration_factor 0x5204
   @cmd_set_temperature_offset 0x5403
