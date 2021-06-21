@@ -147,10 +147,14 @@ defmodule GrowTent.Sensors.Scd30Server do
 
     measurements = convert_raw_measurements(read_measurement)
     # send out to pub sub or telemetry
-    :telemetry.execute([:grow_tent, :sensors], %{temp_c: measurements.temp_c}, %{})
-    :telemetry.execute([:grow_tent, :sensors], %{c02_ppm: measurements.c02_ppm}, %{})
-    :telemetry.execute([:grow_tent, :sensors], %{rh: measurements.rh}, %{})
-    PubSub.broadcast(GrowTent.PubSub, "sensors:scd30", {:new_data, measurements})
+    :telemetry.execute([:grow_tent, :sensors], measurements, %{})
+
+    PubSub.broadcast(
+      GrowTent.PubSub,
+      "sensors:scd30",
+      {:new_data, Map.put(measurements, :timestamp, DateTime.utc_now())}
+    )
+
     # send after 60 seconds to fetch fresh data
     Process.send_after(__MODULE__, :fetch_sensor_data, @data_update_interval)
 
@@ -168,10 +172,27 @@ defmodule GrowTent.Sensors.Scd30Server do
       _::bitstring>> = read_measurement
 
     <<c02::float-size(32)>> = <<c02_mmsb, c02_mlsb, c02_lmsb, c02_llsb>>
-    <<t::float-size(32)>> = <<t_mmsb, t_mlsb, t_lmsb, t_llsb>>
+    <<temp_c::float-size(32)>> = <<t_mmsb, t_mlsb, t_lmsb, t_llsb>>
     <<rh::float-size(32)>> = <<rh_mmsb, rh_mlsb, rh_lmsb, rh_llsb>>
 
-    %{c02_ppm: c02, temp_c: t, rh: rh}
+    vpds = calc_vpd(temp_c, rh)
+
+    Map.merge(%{c02_ppm: c02, temp_c: temp_c, rh: rh}, vpds)
+  end
+
+  defp calc_vpd(temp_c, rh) do
+    # TODO provide way to configure leaf_offset
+    leaf_offset = 2
+    asvp = calc_svp(temp_c)
+    lsvp = calc_svp(temp_c - leaf_offset)
+    avpd = asvp * (1 - rh / 100)
+    lvpd = lsvp - asvp * rh / 100
+
+    %{avpd: avpd, lvpd: lvpd}
+  end
+
+  defp calc_svp(temp_c) do
+    610.78 * Math.exp(temp_c / (temp_c + 238.3) * 17.2694) / 1000
   end
 
   defp check_ambient_pressure(ambient_pressure) do

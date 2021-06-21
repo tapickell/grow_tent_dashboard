@@ -37,7 +37,9 @@ defmodule GrowTentWeb.Telemetry do
       summary("vm.total_run_queue_lengths.io"),
       summary("grow_tent.sensors.temp_c"),
       summary("grow_tent.sensors.c02_ppm"),
-      summary("grow_tent.sensors.rh")
+      summary("grow_tent.sensors.rh"),
+      summary("grow_tent.sensors.avpd"),
+      summary("grow_tent.sensors.lvpd")
     ]
   end
 
