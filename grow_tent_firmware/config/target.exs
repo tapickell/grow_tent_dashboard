@@ -4,6 +4,13 @@ import Config
 # docs for separating out critical OTP applications such as those
 # involved with firmware updates.
 
+config :grow_tent, GrowTentWeb.Endpoint,
+  url: [host: "localhost"],
+  secret_key_base: "dxyJ331p94VqxOj7XhqEs792Cc8Xxn017+fV5ALoMjneFLwlcRZ/hCai65yx0bGM",
+  render_errors: [view: GrowTentWeb.ErrorView, accepts: ~w(html json), layout: false],
+  pubsub_server: GrowTent.PubSub,
+  live_view: [signing_salt: "Qh5bwya6"]
+
 config :shoehorn,
   init: [:nerves_runtime, :nerves_pack],
   app: Mix.Project.config()[:app]

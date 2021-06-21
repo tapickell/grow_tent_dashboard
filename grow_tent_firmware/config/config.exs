@@ -15,12 +15,16 @@ import_config "../../grow_tent/config/prod.exs"
 
 config :grow_tent, GrowTentWeb.Endpoint,
   # Nerves root filesystem is read-only, so disable the code reloader
+  secret_key_base: "dxyJ331p94VqxOj7XhqEs792Cc8Xxn017+fV5ALoMjneFLwlcRZ/hCai65yx0bGM",
   code_reloader: false,
   http: [port: 80],
+  render_errors: [view: GrowTentWeb.ErrorView, accepts: ~w(html json), layout: false],
+  pubsub_server: GrowTent.PubSub,
   # Use compile-time Mix config instead of runtime environment variables
   load_from_system_env: false,
   # Start the server since we're running in a release instead of through `mix`
   server: true,
+  live_view: [signing_salt: "Qh5bwya6"],
   url: [host: "nerves.local", port: 80]
 
 # Customize non-Elixir parts of the firmware. See

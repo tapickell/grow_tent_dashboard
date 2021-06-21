@@ -7,11 +7,9 @@ defmodule GrowTent.Application do
 
   def start(_type, _args) do
     children = [
-      # Start the Telemetry supervisor
       GrowTentWeb.Telemetry,
-      # Start the PubSub system
       {Phoenix.PubSub, name: GrowTent.PubSub},
-      # Start the Endpoint (http/https)
+      GrowTent.Sensors.Scd30Server,
       GrowTentWeb.Endpoint
       # Start a worker by calling: GrowTent.Worker.start_link(arg)
       # {GrowTent.Worker, arg}

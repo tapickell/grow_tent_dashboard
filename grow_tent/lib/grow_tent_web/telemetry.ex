@@ -34,7 +34,10 @@ defmodule GrowTentWeb.Telemetry do
       summary("vm.memory.total", unit: {:byte, :kilobyte}),
       summary("vm.total_run_queue_lengths.total"),
       summary("vm.total_run_queue_lengths.cpu"),
-      summary("vm.total_run_queue_lengths.io")
+      summary("vm.total_run_queue_lengths.io"),
+      summary("grow_tent.sensors.temp_c"),
+      summary("grow_tent.sensors.c02_ppm"),
+      summary("grow_tent.sensors.rh")
     ]
   end
 
