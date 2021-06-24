@@ -115,7 +115,9 @@ defmodule GrowTent.Sensors.Scd30Server do
       measurements: %{
         temp_c: nil,
         rh: nil,
-        co2_ppm: nil
+        co2_ppm: nil,
+        avpd: nil,
+        lvpd: nil
       }
     }
 

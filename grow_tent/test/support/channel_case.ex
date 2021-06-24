@@ -28,13 +28,7 @@ defmodule GrowTentWeb.ChannelCase do
     end
   end
 
-  setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(GrowTent.Repo)
-
-    unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(GrowTent.Repo, {:shared, self()})
-    end
-
+  setup _tags do
     :ok
   end
 end

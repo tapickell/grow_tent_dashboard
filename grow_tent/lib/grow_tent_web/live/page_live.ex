@@ -11,7 +11,9 @@ defmodule GrowTentWeb.PageLive do
     initial_sensor_data = %{
       c02_ppm: 0,
       temp_c: 0,
-      rh: 0
+      rh: 0,
+      avpd: 0,
+      lvpd: 0
     }
 
     {:ok, assign(socket, sensor_data: initial_sensor_data)}

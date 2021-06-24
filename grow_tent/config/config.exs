@@ -7,9 +7,6 @@
 # General application configuration
 use Mix.Config
 
-config :grow_tent,
-  ecto_repos: [GrowTent.Repo]
-
 # Configures the endpoint
 config :grow_tent, GrowTentWeb.Endpoint,
   url: [host: "localhost"],

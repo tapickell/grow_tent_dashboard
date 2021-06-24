@@ -18,8 +18,6 @@ defmodule GrowTent.DataCase do
 
   using do
     quote do
-      alias GrowTent.Repo
-
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
@@ -27,13 +25,7 @@ defmodule GrowTent.DataCase do
     end
   end
 
-  setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(GrowTent.Repo)
-
-    unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(GrowTent.Repo, {:shared, self()})
-    end
-
+  setup _tags do
     :ok
   end
 

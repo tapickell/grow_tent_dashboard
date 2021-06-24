@@ -46,6 +46,7 @@ defmodule GrowTent.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
+      {:circuits_i2c, "~> 0.3.8"},
       {:math, "~> 0.6.0"}
     ]
   end
@@ -58,10 +59,7 @@ defmodule GrowTent.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-      "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      setup: ["deps.get", "cmd npm install --prefix assets"],
       preburn: [
         "cmd npm install --prefix assets --production",
         "cmd npm run deploy --prefix assets",
