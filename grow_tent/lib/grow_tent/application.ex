@@ -10,7 +10,7 @@ defmodule GrowTent.Application do
       GrowTentWeb.Telemetry,
       {Phoenix.PubSub, name: GrowTent.PubSub},
       GrowTent.Sensors.Scd30Server,
-      GrowTent.Store.Supervisor,
+      # GrowTent.Store.Supervisor,
       GrowTentWeb.Endpoint
       # Start a worker by calling: GrowTent.Worker.start_link(arg)
       # {GrowTent.Worker, arg}

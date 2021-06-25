@@ -79,6 +79,62 @@ defmodule GrowTent.Sensors.Scd30Server do
     rh_lmsb::8,
     rh_llsb::8,
     rh_crc1::8>> = read_measurement
+
+
+    LUX SENSOR
+
+    addy = 0x29
+    41
+
+    Formula barometric pressure conversion
+    pressure_pa * 0.00029529983071445 = inHg
+
+    iex(3)> {:ok, lux} = I2cServer.start_link(bus_name: "i2c-1", bus_address: addy)
+    {:ok, #PID<0.4763.0>}
+
+    Get Device ID, common check to see if device is online
+    iex(43)> {:ok, <<dev_id::integer>>} = I2cServer.write_read(lux, 0xA0 ||| 0x12, 1)
+    {:ok, "P"}
+    iex(44)> dev_id
+    80
+    iex(45)> 0x50
+    80
+
+    iex(50)> {:ok, <<chan_zero::integer>>} = I2cServer.write_read(lux, 0xA0 ||| 0x14, 1)
+  {:ok, <<25>>}
+  iex(51)> {:ok, <<chan_one::integer>>} = I2cServer.write_read(lux, 0xA0 ||| 0x16, 1) 
+  {:ok, <<5>>}
+  iex(52)> zhan_zero
+  ** (CompileError) iex:52: undefined function zhan_zero/0
+
+  iex(52)> chan_zero
+  25
+  iex(53)> chan_one
+  5
+  iex(54)> chan_one <<< 8                                                             
+  1280
+  iex(55)> chan_one <<< 8 ||| chan_zero
+  1305
+  iex(56)> chan_one <<< 16 ||| chan_zero
+  327705
+  iex(57)> full - chan_one <<< 16 ||| chan_zero
+  ** (CompileError) iex:57: undefined function full/0
+    (stdlib 3.14.1) lists.erl:1358: :lists.mapfoldl/3
+    (stdlib 3.14.1) lists.erl:1358: :lists.mapfoldl/3
+    (stdlib 3.14.1) lists.erl:1358: :lists.mapfoldl/3
+  iex(57)> full = chan_one <<< 16 ||| chan_zero
+  327705
+  iex(58)> full - chan_one
+  327700
+
+  iex(70)> {:ok, <<enable::bitstring>>} = I2cServer.write_read(lux, 0xA0 ||| 0x00, 1) 
+  {:ok, <<147>>}
+  iex(71)> Integer.to_string(147, 2)
+  "10010011"
+
+  iex(89)> {:ok, <<chan_zero_low::integer, chan_zero_high::integer, chan_one_low::integer, chan_one_high::integer>>} = I2cServer.write_read(lux, 0xA0 ||| 0x14, 4)
+  {:ok, <<28, 0, 5, 0>>}
+
   """
 
   # Client
@@ -95,21 +151,30 @@ defmodule GrowTent.Sensors.Scd30Server do
   @cmd_get_data_ready <<0x02, 0x02>>
   @cmd_read_measurement <<0x03, 0x00>>
   @scd30_default_addr 0x61
+  @bmp388_default_addr 0x77
+  @tsl2591_default_addr 0x29
   @data_update_interval 6_000
   @min_pressure 700
   @max_pressure 1400
 
   @impl true
   def init(i2c_bus) do
-    ambient_pressure = 0
     address = @scd30_default_addr
-    :ok = check_ambient_pressure(ambient_pressure)
 
     {:ok, i2c_ref} = I2C.open(i2c_bus)
+    {:ok, bmp} = BMP3XX.start_link(bus_name: i2c_bus, bus_address: @bmp388_default_addr)
+
+    {:ok,
+     %BMP3XX.Measurement{
+       altitude_m: altitude,
+       pressure_pa: ambient_pressure
+     }} = BMP3XX.measure(bmp)
 
     state = %{
       ref: i2c_ref,
       bus: i2c_bus,
+      bmp: bmp,
+      altitude_m: altitude,
       ambient_pressure: ambient_pressure,
       address: address,
       measurements: %{
@@ -117,7 +182,8 @@ defmodule GrowTent.Sensors.Scd30Server do
         rh: nil,
         co2_ppm: nil,
         avpd: nil,
-        lvpd: nil
+        lvpd: nil,
+        pressure_pa: nil
       }
     }
 
@@ -127,27 +193,42 @@ defmodule GrowTent.Sensors.Scd30Server do
   @impl true
   def handle_continue(
         :sensor_setup,
-        %{ref: ref, address: address, ambient_pressure: _ambient_pressure} = state
+        %{ref: ref, address: address, bmp: bmp} = state
       ) do
+    {:ok,
+     %BMP3XX.Measurement{
+       altitude_m: altitude,
+       pressure_pa: ambient_pressure
+     }} = BMP3XX.measure(bmp)
+
     # do any setup for altitude / barometric pressure / temp offset
     # :ok = I2C.write(ref, address, @cmd_continuous_measurement <> <<0x00, 0x00>> <> <<0x81>>)
     Process.send_after(__MODULE__, :fetch_sensor_data, @data_update_interval)
 
     # TODO need to convert ambient to <<0x00, 0x00>> format
+    # TODO is it better to use pressure or altitude ??
     # TODO need to generate crc-8 in <<0x00>>
 
     {:noreply, state}
   end
 
   @impl true
-  def handle_info(:fetch_sensor_data, %{ref: ref, address: address} = state) do
+  def handle_info(:fetch_sensor_data, %{ref: ref, address: address, bmp: bmp} = state) do
+    {:ok,
+     %BMP3XX.Measurement{
+       pressure_pa: ambient_pressure
+     }} = BMP3XX.measure(bmp)
+
     # read measurement
     :ok = I2C.write(ref, address, <<0x03, 0x00>>)
     {:ok, read_measurement} = I2C.read(ref, address, 19)
     <<msb::8, lsb::8, _::bitstring>> = read_measurement
     _ = Logger.warn("#{__MODULE__} :: <<#{msb}, #{lsb}>> measurement from sensor")
 
-    measurements = convert_raw_measurements(read_measurement)
+    measurements =
+      convert_raw_measurements(read_measurement)
+      |> Map.merge(%{pressure_pa: ambient_pressure})
+
     # send out to pub sub or telemetry
     :telemetry.execute([:grow_tent, :sensors], measurements, %{})
 
