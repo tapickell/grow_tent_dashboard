@@ -54,7 +54,7 @@ defmodule GrowTent.Sensors.Scd30 do
     {chan_zero, chan_one} = raw_luminosity(lux)
     atime = 100.0 * @integration_time + 100.0
 
-    if chan_zero >= max_counts or chan_one >= max_counts,
+    if chan_zero >= @max_counts or chan_one >= @max_counts,
       do: raise("Overflow reading light channels!, Try to reduce the gain of the sensor")
 
     # Calculate lux using same equation as Arduino library:
