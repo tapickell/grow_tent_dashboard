@@ -47,7 +47,8 @@ defmodule GrowTent.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:circuits_i2c, "~> 0.3.8"},
-      {:math, "~> 0.6.0"}
+      {:math, "~> 0.6.0"},
+      {:cerlc, "~> 0.2.0"}
     ]
   end
 

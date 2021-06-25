@@ -4,7 +4,8 @@ defmodule GrowTent.Sensors.Scd30Server do
   require Logger
 
   alias Phoenix.PubSub
-  alias Circuits.I2C
+  alias GrowTent.Sensors.{Scd30, Tsl2951}
+  alias GrowTent.Utils.Units
 
   @moduledoc """
   ❯ cat hello_phoenix/firmware/notes.org
@@ -135,6 +136,28 @@ defmodule GrowTent.Sensors.Scd30Server do
   iex(89)> {:ok, <<chan_zero_low::integer, chan_zero_high::integer, chan_one_low::integer, chan_one_high::integer>>} = I2cServer.write_read(lux, 0xA0 ||| 0x14, 4)
   {:ok, <<28, 0, 5, 0>>}
 
+  mbar uint16 to uint8 split in hex
+  iex(24)> <<700::integer-size(16)>> # mbar at lowest number
+  <<2, 188>>
+  iex(25)> Integer.to_string(2, 16)
+  "2"
+  iex(26)> Integer.to_string(188, 16)
+  "BC"
+  iex(27)> a = 0x02
+  2
+  iex(28)> b = 0xBC
+  188
+  iex(29)> <<mbar::integer-size(16)>> = <<a, b>>
+  <<2, 188>>
+  iex(30)> mbar
+  700
+  iex(52)> <<a, b>> = <<mbar::integer-size(16)>>  
+  <<2, 188>>
+
+  # CRC8 implementation
+  CRC(0xBEEF) = 0x92
+
+
   """
 
   # Client
@@ -147,22 +170,13 @@ defmodule GrowTent.Sensors.Scd30Server do
   end
 
   # Server 
-  @cmd_continuous_measurement <<0x00, 0x10>>
-  @cmd_get_data_ready <<0x02, 0x02>>
-  @cmd_read_measurement <<0x03, 0x00>>
-  @scd30_default_addr 0x61
   @bmp388_default_addr 0x77
-  @tsl2591_default_addr 0x29
   @data_update_interval 6_000
-  @min_pressure 700
-  @max_pressure 1400
 
   @impl true
   def init(i2c_bus) do
-    address = @scd30_default_addr
-
-    {:ok, i2c_ref} = I2C.open(i2c_bus)
     {:ok, bmp} = BMP3XX.start_link(bus_name: i2c_bus, bus_address: @bmp388_default_addr)
+    {:ok, lux} = Tsl2951.start_link(i2c_bus)
 
     {:ok,
      %BMP3XX.Measurement{
@@ -170,20 +184,23 @@ defmodule GrowTent.Sensors.Scd30Server do
        pressure_pa: ambient_pressure
      }} = BMP3XX.measure(bmp)
 
+    {:ok, scd} = Scd30.start_link(i2c_bus, Units.pascal_to_mbar(ambient_pressure))
+
     state = %{
-      ref: i2c_ref,
       bus: i2c_bus,
+      scd: scd,
       bmp: bmp,
+      lux: lux,
       altitude_m: altitude,
       ambient_pressure: ambient_pressure,
-      address: address,
       measurements: %{
         temp_c: nil,
         rh: nil,
         co2_ppm: nil,
         avpd: nil,
         lvpd: nil,
-        pressure_pa: nil
+        altitude_m: altitude,
+        pressure_pa: ambient_pressure
       }
     }
 
@@ -193,41 +210,31 @@ defmodule GrowTent.Sensors.Scd30Server do
   @impl true
   def handle_continue(
         :sensor_setup,
-        %{ref: ref, address: address, bmp: bmp} = state
+        %{bmp: bmp} = state
       ) do
+    Process.send_after(__MODULE__, :fetch_sensor_data, @data_update_interval)
+
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info(:fetch_sensor_data, %{scd: scd, lux: lux, bmp: bmp} = state) do
     {:ok,
      %BMP3XX.Measurement{
        altitude_m: altitude,
        pressure_pa: ambient_pressure
      }} = BMP3XX.measure(bmp)
 
-    # do any setup for altitude / barometric pressure / temp offset
-    # :ok = I2C.write(ref, address, @cmd_continuous_measurement <> <<0x00, 0x00>> <> <<0x81>>)
-    Process.send_after(__MODULE__, :fetch_sensor_data, @data_update_interval)
-
-    # TODO need to convert ambient to <<0x00, 0x00>> format
-    # TODO is it better to use pressure or altitude ??
-    # TODO need to generate crc-8 in <<0x00>>
-
-    {:noreply, state}
-  end
-
-  @impl true
-  def handle_info(:fetch_sensor_data, %{ref: ref, address: address, bmp: bmp} = state) do
-    {:ok,
-     %BMP3XX.Measurement{
-       pressure_pa: ambient_pressure
-     }} = BMP3XX.measure(bmp)
-
     # read measurement
-    :ok = I2C.write(ref, address, <<0x03, 0x00>>)
-    {:ok, read_measurement} = I2C.read(ref, address, 19)
-    <<msb::8, lsb::8, _::bitstring>> = read_measurement
-    _ = Logger.warn("#{__MODULE__} :: <<#{msb}, #{lsb}>> measurement from sensor")
+    scd_measurements = Scd30.read_measurement(scd)
 
     measurements =
-      convert_raw_measurements(read_measurement)
-      |> Map.merge(%{pressure_pa: ambient_pressure})
+      scd_measurements
+      |> Map.merge(%{
+        pressure_inhg: Units.pascal_to_inhg(ambient_pressure),
+        altitude_m: altitude,
+        pressure_pa: ambient_pressure
+      })
 
     # send out to pub sub or telemetry
     :telemetry.execute([:grow_tent, :sensors], measurements, %{})
@@ -247,42 +254,5 @@ defmodule GrowTent.Sensors.Scd30Server do
 
   def handle_call(:last_measurements, _from, %{measurements: last_measurements} = state) do
     {:reply, last_measurements, state}
-  end
-
-  defp convert_raw_measurements(read_measurement) do
-    <<c02_mmsb, c02_mlsb, _c02_crc0, c02_lmsb, c02_llsb, _c02_crc1, t_mmsb, t_mlsb, _t_crc0,
-      t_lmsb, t_llsb, _t_crc1, rh_mmsb, rh_mlsb, _rh_crc0, rh_lmsb, rh_llsb,
-      _::bitstring>> = read_measurement
-
-    <<c02::float-size(32)>> = <<c02_mmsb, c02_mlsb, c02_lmsb, c02_llsb>>
-    <<temp_c::float-size(32)>> = <<t_mmsb, t_mlsb, t_lmsb, t_llsb>>
-    <<rh::float-size(32)>> = <<rh_mmsb, rh_mlsb, rh_lmsb, rh_llsb>>
-
-    vpds = calc_vpd(temp_c, rh)
-
-    Map.merge(%{c02_ppm: c02, temp_c: temp_c, rh: rh}, vpds)
-  end
-
-  defp calc_vpd(temp_c, rh) do
-    # TODO provide way to configure leaf_offset
-    leaf_offset = 2
-    asvp = calc_svp(temp_c)
-    lsvp = calc_svp(temp_c - leaf_offset)
-    avpd = asvp * (1 - rh / 100)
-    lvpd = lsvp - asvp * rh / 100
-
-    %{avpd: avpd, lvpd: lvpd}
-  end
-
-  defp calc_svp(temp_c) do
-    610.78 * Math.exp(temp_c / (temp_c + 238.3) * 17.2694) / 1000
-  end
-
-  defp check_ambient_pressure(ambient_pressure) do
-    if ambient_pressure != 0 &&
-         (ambient_pressure < @min_pressure || ambient_pressure > @max_pressure),
-       do: throw("ambient_pressure must be from 700-1400 mBar")
-
-    :ok
   end
 end

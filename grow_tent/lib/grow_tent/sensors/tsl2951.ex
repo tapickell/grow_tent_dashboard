@@ -1,4 +1,4 @@
-defmodule GrowTent.Sensors.Scd30 do
+defmodule GrowTent.Sensors.Tsl2951 do
   use Bitwise
 
   @device_id 0x50
@@ -18,7 +18,7 @@ defmodule GrowTent.Sensors.Scd30 do
   @lux_coefc 0.59
   @lux_coefd 0.86
 
-  def init(bus_name, address \\ @default_address) do
+  def start_link(bus_name, address \\ @default_address) do
     I2cServer.start_link(bus_name: bus_name, bus_address: address)
   end
 
@@ -31,7 +31,7 @@ defmodule GrowTent.Sensors.Scd30 do
     I2cServer.write(
       lux,
       @command_bit ||| @registerenable,
-      @enablepoweron ||| @enableaen ||| @enablenpien ||| @enablenpien
+      @enablepoweron ||| @enableaen ||| @enableaien ||| @enablenpien
     )
   end
 
