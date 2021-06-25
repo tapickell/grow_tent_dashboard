@@ -177,6 +177,7 @@ defmodule GrowTent.Sensors.Scd30Server do
   def init(i2c_bus) do
     {:ok, bmp} = BMP3XX.start_link(bus_name: i2c_bus, bus_address: @bmp388_default_addr)
     {:ok, lux} = Tsl2951.start_link(i2c_bus)
+    :ok = Tsl2951.enable(lux)
     {:ok, scd} = Scd30.start_link(i2c_bus)
 
     {:ok,
@@ -226,8 +227,10 @@ defmodule GrowTent.Sensors.Scd30Server do
        pressure_pa: ambient_pressure
      }} = BMP3XX.measure(bmp)
 
-    # read measurement
     scd_measurements = Scd30.read_measurement(scd)
+
+    {zero, one} = Tsl2951.raw_luminosity(lux)
+    lux_reading = Tsl2951.lux(lux)
 
     measurements =
       scd_measurements
@@ -235,6 +238,11 @@ defmodule GrowTent.Sensors.Scd30Server do
         pressure_inhg: Units.pascal_to_inhg(ambient_pressure),
         altitude_m: altitude,
         pressure_pa: ambient_pressure
+      })
+      |> Map.merge(%{
+        lux_reading: lux_reading,
+        visible_light: zero,
+        infrared_light: one
       })
 
     # send out to pub sub or telemetry

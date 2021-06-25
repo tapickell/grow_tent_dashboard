@@ -40,7 +40,12 @@ defmodule GrowTentWeb.Telemetry do
       summary("grow_tent.sensors.c02_ppm"),
       summary("grow_tent.sensors.rh"),
       summary("grow_tent.sensors.avpd"),
-      summary("grow_tent.sensors.lvpd")
+      summary("grow_tent.sensors.lvpd"),
+      summary("grow_tent.sensors.infrared_light"),
+      summary("grow_tent.sensors.lux_reading"),
+      summary("grow_tent.sensors.pressure_inhg"),
+      summary("grow_tent.sensors.pressure_pa"),
+      summary("grow_tent.sensors.visible_light")
     ]
   end
 
