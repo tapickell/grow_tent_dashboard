@@ -17,20 +17,24 @@ defmodule GrowTent.Sensors.Scd30 do
   @crc8_def :cerlc.init({8, 0x31, 0xFF, 0x00, false})
 
   def start_link(bus_name, address \\ @default_address) do
+    _ = Logger.info("[SCD30] Starting on bus #{bus_name} at address #{address}")
+
     I2cServer.start_link(bus_name: bus_name, bus_address: address)
   end
 
   # TODO how often should the ambient_pressure be reset for this sensor ??
   def init(scd, ambient_pressure \\ 0) do
+    _ = Logger.info("[SCD30] Initializing sensor :: #{inspect(scd)}")
     <<msb, lsb>> = <<ambient_pressure::integer-size(16)>>
     data = @cmd_continuous_measurement <> <<msb, lsb>>
     crc8 = crc8_encode(data)
     # TODO need to generate crc-8 in <<0x00>>
-    I2cServer.write(scd, @cmd_continuous_measurement <> <<msb, lsb>> <> crc8)
+    I2cServer.write(scd, @cmd_continuous_measurement <> <<msb, lsb>> <> <<crc8>>)
   end
 
   def read_measurement(scd) do
     {:ok, read_measurement} = I2cServer.write_read(scd, @cmd_read_measurement, 19)
+    # {:error, :i2c_nak}
 
     convert_raw_measurements(read_measurement)
   end

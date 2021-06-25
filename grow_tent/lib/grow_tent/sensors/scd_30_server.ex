@@ -177,6 +177,7 @@ defmodule GrowTent.Sensors.Scd30Server do
   def init(i2c_bus) do
     {:ok, bmp} = BMP3XX.start_link(bus_name: i2c_bus, bus_address: @bmp388_default_addr)
     {:ok, lux} = Tsl2951.start_link(i2c_bus)
+    {:ok, scd} = Scd30.start_link(i2c_bus)
 
     {:ok,
      %BMP3XX.Measurement{
@@ -184,7 +185,7 @@ defmodule GrowTent.Sensors.Scd30Server do
        pressure_pa: ambient_pressure
      }} = BMP3XX.measure(bmp)
 
-    {:ok, scd} = Scd30.start_link(i2c_bus, Units.pascal_to_mbar(ambient_pressure))
+    :ok = Scd30.init(scd, Units.pascal_to_mbar(ambient_pressure))
 
     state = %{
       bus: i2c_bus,
