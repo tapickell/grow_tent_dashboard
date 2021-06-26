@@ -186,7 +186,8 @@ defmodule GrowTent.Sensors.Scd30Server do
        pressure_pa: ambient_pressure
      }} = BMP3XX.measure(bmp)
 
-    :ok = Scd30.init(scd, Units.pascal_to_mbar(ambient_pressure))
+    # :ok = Scd30.init(scd, Units.pascal_to_mbar(ambient_pressure))
+    :ok = Scd30.init(scd, 0)
 
     state = %{
       bus: i2c_bus,

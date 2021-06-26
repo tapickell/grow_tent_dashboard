@@ -1,6 +1,8 @@
 defmodule GrowTent.Sensors.Tsl2951 do
   use Bitwise
 
+  require Logger
+
   @device_id 0x50
   @default_address 0x29
   @command_bit 0xA0
@@ -54,16 +56,18 @@ defmodule GrowTent.Sensors.Tsl2951 do
     {chan_zero, chan_one} = raw_luminosity(lux)
     atime = 100.0 * @integration_time + 100.0
 
-    if chan_zero >= @max_counts or chan_one >= @max_counts,
-      do: raise("Overflow reading light channels!, Try to reduce the gain of the sensor")
+    if chan_zero >= @max_counts or chan_one >= @max_counts do
+      _ = Logger.error("Overflow reading light channels!, Try to reduce the gain of the sensor")
+      0
+    else
+      # Calculate lux using same equation as Arduino library:
+      # https://github.com/adafruit/Adafruit_TSL2591_Library/blob/master/Adafruit_TSL2591.cpp
+      again = 1.0
+      cpl = atime * again / @lux_df
+      lux1 = (chan_zero - @lux_coefb * chan_one) / cpl
+      lux2 = (@lux_coefc * chan_zero - @lux_coefd * chan_one) / cpl
 
-    # Calculate lux using same equation as Arduino library:
-    # https://github.com/adafruit/Adafruit_TSL2591_Library/blob/master/Adafruit_TSL2591.cpp
-    again = 1.0
-    cpl = atime * again / @lux_df
-    lux1 = (chan_zero - @lux_coefb * chan_one) / cpl
-    lux2 = (@lux_coefc * chan_zero - @lux_coefd * chan_one) / cpl
-
-    max(lux1, lux2)
+      max(lux1, lux2)
+    end
   end
 end

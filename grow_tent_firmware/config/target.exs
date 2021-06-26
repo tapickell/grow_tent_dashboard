@@ -77,7 +77,16 @@ config :vintage_net,
            }
          ]
        },
-       ipv4: %{method: :dhcp}
+       # ipv4: %{method: :dhcp}
+       ipv4: %{
+         address: {192, 168, 86, 91},
+         gateway: {192, 168, 86, 1},
+         prefix_length: 24,
+         name_servers: [
+           {1, 1, 1, 1}
+         ],
+         method: :static
+       }
      }}
   ]
 

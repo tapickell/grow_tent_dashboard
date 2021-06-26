@@ -6,11 +6,12 @@ defmodule GrowTent.Sensors.Scd30 do
   @cmd_set_measurement_interval <<0x46, 0x00>>
   @cmd_get_data_ready <<0x02, 0x02>>
   @cmd_read_measurement <<0x03, 0x00>>
-  @cmd_automatic_self_calibration 0x5306
-  @cmd_set_forced_recalibration_factor 0x5204
-  @cmd_set_temperature_offset 0x5403
-  @cmd_set_altitude_compensation 0x5102
-  @cmd_soft_reset 0xD304
+  @cmd_automatic_self_calibration <<0x53, 0x06>>
+  @cmd_set_forced_recalibration_factor <<0x52, 0x04>>
+  @cmd_set_temperature_offset <<0x54, 0x03>>
+  @cmd_set_altitude_compensation <<0x51, 0x02>>
+  @cmd_soft_reset <<0xD3, 0x04>>
+  @cmd_stop_readings <<0x01, 0x04>>
   @min_pressure 700
   @max_pressure 1400
   # Custom CRC parameters: {bits, polynomial, init_value, final_xor_value, reflected}
@@ -25,11 +26,7 @@ defmodule GrowTent.Sensors.Scd30 do
   # TODO how often should the ambient_pressure be reset for this sensor ??
   def init(scd, ambient_pressure \\ 0) do
     _ = Logger.info("[SCD30] Initializing sensor :: #{inspect(scd)}")
-    <<msb, lsb>> = <<ambient_pressure::integer-size(16)>>
-    data = @cmd_continuous_measurement <> <<msb, lsb>>
-    crc8 = crc8_encode(data)
-    # TODO need to generate crc-8 in <<0x00>>
-    I2cServer.write(scd, @cmd_continuous_measurement <> <<msb, lsb>> <> <<crc8>>)
+    set_ambient_pressure(scd, ambient_pressure)
   end
 
   def read_measurement(scd) do
@@ -37,6 +34,41 @@ defmodule GrowTent.Sensors.Scd30 do
     # {:error, :i2c_nak}
 
     convert_raw_measurements(read_measurement)
+  end
+
+  def set_ambient_pressure(scd, ambient_pressure) do
+    <<msb, lsb>> = <<ambient_pressure::integer-size(16)>>
+    data = @cmd_continuous_measurement <> <<msb, lsb>>
+    crc8 = crc8_encode(data)
+
+    I2cServer.write(scd, @cmd_continuous_measurement <> <<msb, lsb>> <> <<crc8>>)
+  end
+
+  def set_altitude(scd, altitude_m) do
+    <<msb, lsb>> = <<altitude_m::integer-size(16)>>
+    data = @cmd_continuous_measurement <> <<msb, lsb>>
+    crc8 = crc8_encode(data)
+
+    I2cServer.write(scd, @cmd_set_altitude_compensation <> <<msb, lsb>> <> <<crc8>>)
+  end
+
+  def stop_readings(scd) do
+    I2cServer.write(scd, @cmd_stop_readings <> <<0x01, 0x07>>)
+  end
+
+  def data_reset(scd) do
+    # write read command
+    I2cServer.write(scd, @cmd_read_measurement)
+    # reset to continuous w/ 0 ambient pressure
+    I2cServer.write(scd, <<0x00, 0x10, 0x00, 0x00, 0x81>>)
+  end
+
+  def reset(scd) do
+    I2cServer.write(scd, @cmd_soft_reset)
+  end
+
+  def data_available(scd) do
+    I2cServer.write_read(scd, @cmd_get_data_ready, 3)
   end
 
   # private
