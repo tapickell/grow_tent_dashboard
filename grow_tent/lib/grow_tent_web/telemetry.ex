@@ -36,7 +36,6 @@ defmodule GrowTentWeb.Telemetry do
       summary("vm.total_run_queue_lengths.cpu"),
       summary("vm.total_run_queue_lengths.io"),
       summary("grow_tent.sensors.temp_c"),
-      summary("grow_tent.sensors.pressure_pa"),
       summary("grow_tent.sensors.c02_ppm"),
       summary("grow_tent.sensors.rh"),
       summary("grow_tent.sensors.avpd"),
@@ -46,6 +45,22 @@ defmodule GrowTentWeb.Telemetry do
       summary("grow_tent.sensors.pressure_inhg"),
       summary("grow_tent.sensors.pressure_pa"),
       summary("grow_tent.sensors.visible_light")
+    ]
+  end
+
+  def prometheus_metrics do
+    [
+      last_value("grow_tent.sensors.temp_c"),
+      last_value("grow_tent.sensors.temp_f"),
+      last_value("grow_tent.sensors.c02_ppm"),
+      last_value("grow_tent.sensors.rh"),
+      last_value("grow_tent.sensors.avpd"),
+      last_value("grow_tent.sensors.lvpd"),
+      last_value("grow_tent.sensors.infrared_light"),
+      last_value("grow_tent.sensors.lux_reading"),
+      last_value("grow_tent.sensors.pressure_inhg"),
+      last_value("grow_tent.sensors.pressure_pa"),
+      last_value("grow_tent.sensors.visible_light")
     ]
   end
 

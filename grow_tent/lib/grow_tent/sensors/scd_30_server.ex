@@ -197,6 +197,7 @@ defmodule GrowTent.Sensors.Scd30Server do
       ambient_pressure: ambient_pressure,
       measurements: %{
         temp_c: nil,
+        temp_f: nil,
         rh: nil,
         co2_ppm: nil,
         avpd: nil,
@@ -227,13 +228,16 @@ defmodule GrowTent.Sensors.Scd30Server do
        pressure_pa: ambient_pressure
      }} = BMP3XX.measure(bmp)
 
-    scd_measurements = Scd30.read_measurement(scd)
+    %{temp_c: temp_c} = scd_measurements = Scd30.read_measurement(scd)
 
     {zero, one} = Tsl2951.raw_luminosity(lux)
     lux_reading = Tsl2951.lux(lux)
 
     measurements =
       scd_measurements
+      |> Map.merge(%{
+        temp_f: Units.celcius_to_f(temp_c)
+      })
       |> Map.merge(%{
         pressure_inhg: Units.pascal_to_inhg(ambient_pressure),
         altitude_m: altitude,

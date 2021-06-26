@@ -41,7 +41,7 @@ defmodule GrowTentWeb.Endpoint do
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
-  plug PromEx.Plug, prom_ex_module: GrowTent.PromEx
+  # plug PromEx.Plug, prom_ex_module: GrowTent.PromEx
 
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],

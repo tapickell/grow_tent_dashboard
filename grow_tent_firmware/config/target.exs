@@ -69,9 +69,13 @@ config :vintage_net,
      %{
        type: VintageNetWiFi,
        vintage_net_wifi: %{
-         key_mgmt: "wpa_psk",
-         ssid: "pickles",
-         psk: "Sprt121926"
+         networks: [
+           %{
+             key_mgmt: :wpa_psk,
+             ssid: "pickles",
+             psk: "Sprt121926"
+           }
+         ]
        },
        ipv4: %{method: :dhcp}
      }}

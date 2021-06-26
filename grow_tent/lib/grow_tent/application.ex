@@ -11,7 +11,8 @@ defmodule GrowTent.Application do
     children =
       [
         GrowTentWeb.Telemetry,
-        GrowTent.PromEx,
+        # GrowTent.PromEx,
+        {TelemetryMetricsPrometheus, [metrics: GrowTentWeb.Telemetry.prometheus_metrics()]},
         {Phoenix.PubSub, name: GrowTent.PubSub},
         # GrowTent.Store.Supervisor,
         GrowTentWeb.Endpoint
@@ -41,7 +42,7 @@ defmodule GrowTent.Application do
 
       _ ->
         _ = Logger.info("Live Sensors ON")
-        [GrowTent.Sensors.Scd30Server | list]
+        list ++ [GrowTent.Sensors.Scd30Server]
     end
   end
 end
