@@ -3,18 +3,22 @@ defmodule GrowTent.Application do
   # for more information on OTP Applications
   @moduledoc false
 
+  require Logger
+
   use Application
 
   def start(_type, _args) do
-    children = [
-      GrowTentWeb.Telemetry,
-      {Phoenix.PubSub, name: GrowTent.PubSub},
-      GrowTent.Sensors.Scd30Server,
-      # GrowTent.Store.Supervisor,
-      GrowTentWeb.Endpoint
-      # Start a worker by calling: GrowTent.Worker.start_link(arg)
-      # {GrowTent.Worker, arg}
-    ]
+    children =
+      [
+        GrowTentWeb.Telemetry,
+        GrowTent.PromEx,
+        {Phoenix.PubSub, name: GrowTent.PubSub},
+        # GrowTent.Store.Supervisor,
+        GrowTentWeb.Endpoint
+        # Start a worker by calling: GrowTent.Worker.start_link(arg)
+        # {GrowTent.Worker, arg}
+      ]
+      |> live_sensors()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -27,5 +31,17 @@ defmodule GrowTent.Application do
   def config_change(changed, _new, removed) do
     GrowTentWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+  defp live_sensors(list) do
+    case System.get_env("LIVE_SENSORS") do
+      "off" ->
+        _ = Logger.warn("Live Sensors OFF")
+        list
+
+      _ ->
+        _ = Logger.info("Live Sensors ON")
+        [GrowTent.Sensors.Scd30Server | list]
+    end
   end
 end

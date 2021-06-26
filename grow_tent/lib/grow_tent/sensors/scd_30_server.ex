@@ -181,7 +181,7 @@ defmodule GrowTent.Sensors.Scd30Server do
     {:ok, scd} = Scd30.start_link(i2c_bus)
 
     {:ok,
-     %BMP3XX.Measurement{
+     %{
        altitude_m: altitude,
        pressure_pa: ambient_pressure
      }} = BMP3XX.measure(bmp)
@@ -222,7 +222,7 @@ defmodule GrowTent.Sensors.Scd30Server do
   @impl true
   def handle_info(:fetch_sensor_data, %{scd: scd, lux: lux, bmp: bmp} = state) do
     {:ok,
-     %BMP3XX.Measurement{
+     %{
        altitude_m: altitude,
        pressure_pa: ambient_pressure
      }} = BMP3XX.measure(bmp)

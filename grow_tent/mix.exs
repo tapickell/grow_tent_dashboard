@@ -20,7 +20,13 @@ defmodule GrowTent.MixProject do
   def application do
     [
       mod: {GrowTent.Application, []},
-      extra_applications: [:logger, :runtime_tools, :crypto, :os_mon, :phoenix_ecto]
+      extra_applications: [
+        :logger,
+        :runtime_tools,
+        :crypto,
+        :os_mon,
+        :phoenix_ecto
+      ]
     ]
   end
 
@@ -43,10 +49,13 @@ defmodule GrowTent.MixProject do
       {:phoenix_live_dashboard, "~> 0.4"},
       {:telemetry_metrics, "~> 0.4"},
       {:telemetry_poller, "~> 0.4"},
+      {:prom_ex, "~> 1.2.2"},
+      # {:prometheus_ex, "~> 3.0"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:circuits_i2c, "~> 0.3.8"},
+      {:bmp3xx, "~> 0.1.2"},
       {:math, "~> 0.6.0"},
       {:cerlc, "~> 0.2.0"}
     ]

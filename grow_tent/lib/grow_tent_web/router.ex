@@ -18,6 +18,7 @@ defmodule GrowTentWeb.Router do
     pipe_through :browser
 
     live "/", PageLive, :index
+    # get "/metrics", MetricsController, :index
   end
 
   # Other scopes may use custom stacks.

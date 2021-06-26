@@ -15,6 +15,13 @@ config :grow_tent, GrowTentWeb.Endpoint,
   pubsub_server: GrowTent.PubSub,
   live_view: [signing_salt: "Qh5bwya6"]
 
+# config :grow_tent, GrowTent.PromEx,
+#  disabled: false,
+#  manual_metrics_start_delay: :no_delay,
+#  drop_metrics_groups: [],
+#  grafana: :disabled,
+#  metrics_server: :enabled
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
