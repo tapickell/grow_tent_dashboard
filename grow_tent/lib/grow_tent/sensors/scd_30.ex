@@ -58,9 +58,8 @@ defmodule GrowTent.Sensors.Scd30 do
 
   def data_reset(scd) do
     # write read command
-    I2cServer.write(scd, @cmd_read_measurement)
-    # reset to continuous w/ 0 ambient pressure
-    I2cServer.write(scd, <<0x00, 0x10, 0x00, 0x00, 0x81>>)
+    :ok = I2cServer.write(scd, @cmd_read_measurement)
+    data_available(scd)
   end
 
   def reset(scd) do
