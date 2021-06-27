@@ -71,8 +71,10 @@ defmodule GrowTent.Sensors.Tsl2951 do
     # https://github.com/adafruit/Adafruit_TSL2591_Library/blob/master/Adafruit_TSL2591.cpp
     # new calculation
     # lux = (((float)ch0 - (float)ch1)) * (1.0F - ((float)ch1 / (float)ch0)) / cpl;
-    lux = (chan_zero - chan_one) * (again - chan_one / chan_zero) / cpl
-
-    lux
+    if is_integer(chan_zero) and is_integer(chan_one) do
+      (chan_zero - chan_one) * (again - chan_one / chan_zero) / cpl
+    else
+      0
+    end
   end
 end

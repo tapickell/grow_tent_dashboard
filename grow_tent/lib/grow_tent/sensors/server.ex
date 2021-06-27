@@ -1,4 +1,4 @@
-defmodule GrowTent.Sensors.Scd30Server do
+defmodule GrowTent.Sensors.Server do
   use GenServer
 
   require Logger
@@ -171,46 +171,50 @@ defmodule GrowTent.Sensors.Scd30Server do
 
   # Server 
   @bmp388_default_addr 0x77
-  @data_update_interval 6_000
+  @data_update_interval 9_000
 
   @impl true
   def init(i2c_bus) do
-    {:ok, bmp} = BMP3XX.start_link(bus_name: i2c_bus, bus_address: @bmp388_default_addr)
-    {:ok, lux} = Tsl2951.start_link(i2c_bus)
-    :ok = Tsl2951.enable(lux)
-    {:ok, scd} = Scd30.start_link(i2c_bus)
+    with device_list when is_list(device_list) <- Circuits.I2C.detect_devices(i2c_bus),
+         {:ok, bmp} <- BMP3XX.start_link(bus_name: i2c_bus, bus_address: @bmp388_default_addr),
+         {:ok, lux} <- Tsl2951.start_link(i2c_bus),
+         {:ok, scd} <- Scd30.start_link(i2c_bus) do
+      :ok = Tsl2951.enable(lux)
 
-    {:ok,
-     %{
-       altitude_m: altitude,
-       pressure_pa: ambient_pressure,
-       temperature_c: bmp_temp_c
-     }} = BMP3XX.measure(bmp)
+      {:ok,
+       %{
+         altitude_m: altitude,
+         pressure_pa: ambient_pressure,
+         temperature_c: bmp_temp_c
+       }} = BMP3XX.measure(bmp)
 
-    # :ok = Scd30.init(scd, Units.pascal_to_mbar(ambient_pressure))
-    :ok = Scd30.init(scd, 0)
+      # :ok = Scd30.init(scd, Units.pascal_to_mbar(ambient_pressure))
+      :ok = Scd30.init(scd, 0)
 
-    state = %{
-      bus: i2c_bus,
-      scd: scd,
-      bmp: bmp,
-      lux: lux,
-      altitude_m: altitude,
-      ambient_pressure: ambient_pressure,
-      measurements: %{
-        bmp_temp_c: nil,
-        temp_c: nil,
-        temp_f: nil,
-        rh: nil,
-        co2_ppm: nil,
-        avpd: nil,
-        lvpd: nil,
-        altitude_m: altitude,
-        pressure_pa: ambient_pressure
+      state = %{
+        bus: i2c_bus,
+        scd: scd,
+        bmp: bmp,
+        lux: lux,
+        measurements: %{
+          temp_c_bmp: bmp_temp_c,
+          temp_c: nil,
+          temp_f: nil,
+          rh: nil,
+          co2_ppm: nil,
+          avpd: nil,
+          lvpd: nil,
+          altitude_m: altitude,
+          pressure_pa: ambient_pressure
+        }
       }
-    }
 
-    {:ok, state, {:continue, :sensor_setup}}
+      {:ok, state, {:continue, :sensor_setup}}
+    else
+      error_case ->
+        _ = Logger.error("Unable to start sensor server :: #{inspect(error_case)}")
+        :ignore
+    end
   end
 
   @impl true
@@ -243,7 +247,7 @@ defmodule GrowTent.Sensors.Scd30Server do
         pressure_inhg: Units.pascal_to_inhg(ambient_pressure),
         altitude_m: altitude,
         pressure_pa: ambient_pressure,
-        bmp_temp_c: bmp_temp_c
+        temp_c_bmp: bmp_temp_c
       })
       |> Map.merge(%{
         lux_reading: lux_reading,
@@ -267,6 +271,7 @@ defmodule GrowTent.Sensors.Scd30Server do
     {:noreply, Map.put(state, :measurements, measurements)}
   end
 
+  @impl true
   def handle_call(:last_measurements, _from, %{measurements: last_measurements} = state) do
     {:reply, last_measurements, state}
   end

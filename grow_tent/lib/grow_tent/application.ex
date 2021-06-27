@@ -42,7 +42,7 @@ defmodule GrowTent.Application do
 
       _ ->
         _ = Logger.info("Live Sensors ON")
-        list ++ [GrowTent.Sensors.Scd30Server]
+        list ++ [GrowTent.Sensors.Supervisor]
     end
   end
 end
