@@ -36,6 +36,7 @@ defmodule GrowTentWeb.Telemetry do
       summary("vm.total_run_queue_lengths.cpu"),
       summary("vm.total_run_queue_lengths.io"),
       summary("grow_tent.sensors.temp_c"),
+      summary("grow_tent.sensors.bmp_temp_c"),
       summary("grow_tent.sensors.c02_ppm"),
       summary("grow_tent.sensors.rh"),
       summary("grow_tent.sensors.avpd"),
@@ -51,6 +52,7 @@ defmodule GrowTentWeb.Telemetry do
   def prometheus_metrics do
     [
       last_value("grow_tent.sensors.temp_c"),
+      last_value("grow_tent.sensors.bmp_temp_c"),
       last_value("grow_tent.sensors.temp_f"),
       last_value("grow_tent.sensors.c02_ppm"),
       last_value("grow_tent.sensors.rh"),

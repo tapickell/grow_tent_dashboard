@@ -183,7 +183,8 @@ defmodule GrowTent.Sensors.Scd30Server do
     {:ok,
      %{
        altitude_m: altitude,
-       pressure_pa: ambient_pressure
+       pressure_pa: ambient_pressure,
+       temperature_c: bmp_temp_c
      }} = BMP3XX.measure(bmp)
 
     # :ok = Scd30.init(scd, Units.pascal_to_mbar(ambient_pressure))
@@ -197,6 +198,7 @@ defmodule GrowTent.Sensors.Scd30Server do
       altitude_m: altitude,
       ambient_pressure: ambient_pressure,
       measurements: %{
+        bmp_temp_c: nil,
         temp_c: nil,
         temp_f: nil,
         rh: nil,
@@ -212,10 +214,7 @@ defmodule GrowTent.Sensors.Scd30Server do
   end
 
   @impl true
-  def handle_continue(
-        :sensor_setup,
-        %{bmp: bmp} = state
-      ) do
+  def handle_continue(:sensor_setup, state) do
     Process.send_after(__MODULE__, :fetch_sensor_data, @data_update_interval)
 
     {:noreply, state}
@@ -226,7 +225,8 @@ defmodule GrowTent.Sensors.Scd30Server do
     {:ok,
      %{
        altitude_m: altitude,
-       pressure_pa: ambient_pressure
+       pressure_pa: ambient_pressure,
+       temperature_c: bmp_temp_c
      }} = BMP3XX.measure(bmp)
 
     %{temp_c: temp_c} = scd_measurements = Scd30.read_measurement(scd)
@@ -242,7 +242,8 @@ defmodule GrowTent.Sensors.Scd30Server do
       |> Map.merge(%{
         pressure_inhg: Units.pascal_to_inhg(ambient_pressure),
         altitude_m: altitude,
-        pressure_pa: ambient_pressure
+        pressure_pa: ambient_pressure,
+        bmp_temp_c: bmp_temp_c
       })
       |> Map.merge(%{
         lux_reading: lux_reading,

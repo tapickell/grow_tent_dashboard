@@ -26,7 +26,12 @@ defmodule GrowTent.Sensors.Scd30 do
   # TODO how often should the ambient_pressure be reset for this sensor ??
   def init(scd, ambient_pressure \\ 0) do
     _ = Logger.info("[SCD30] Initializing sensor :: #{inspect(scd)}")
-    set_ambient_pressure(scd, ambient_pressure)
+
+    {:ok, data} = data_reset(scd)
+    _ = Logger.info("[SCD30] Resetting sensor data :: #{inspect(data)}")
+
+    # set_ambient_pressure(scd, ambient_pressure)
+    :ok
   end
 
   def read_measurement(scd) do
