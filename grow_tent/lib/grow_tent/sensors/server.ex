@@ -177,10 +177,7 @@ defmodule GrowTent.Sensors.Server do
   def init(i2c_bus) do
     with device_list when is_list(device_list) <- Circuits.I2C.detect_devices(i2c_bus),
          {:ok, bmp} <- BMP3XX.start_link(bus_name: i2c_bus, bus_address: @bmp388_default_addr),
-         {:ok, lux} <- Tsl2951.start_link(i2c_bus),
          {:ok, scd} <- Scd30.start_link(i2c_bus) do
-      :ok = Tsl2951.enable(lux)
-
       {:ok,
        %{
          altitude_m: altitude,
@@ -195,7 +192,6 @@ defmodule GrowTent.Sensors.Server do
         bus: i2c_bus,
         scd: scd,
         bmp: bmp,
-        lux: lux,
         measurements: %{
           temp_c_bmp: bmp_temp_c,
           temp_c: nil,
@@ -225,7 +221,7 @@ defmodule GrowTent.Sensors.Server do
   end
 
   @impl true
-  def handle_info(:fetch_sensor_data, %{scd: scd, lux: lux, bmp: bmp} = state) do
+  def handle_info(:fetch_sensor_data, %{scd: scd, bmp: bmp} = state) do
     {:ok,
      %{
        altitude_m: altitude,
@@ -234,9 +230,6 @@ defmodule GrowTent.Sensors.Server do
      }} = BMP3XX.measure(bmp)
 
     %{temp_c: temp_c} = scd_measurements = Scd30.read_measurement(scd)
-
-    {zero, one} = Tsl2951.raw_luminosity(lux)
-    lux_reading = Tsl2951.lux(lux)
 
     measurements =
       scd_measurements
@@ -248,11 +241,6 @@ defmodule GrowTent.Sensors.Server do
         altitude_m: altitude,
         pressure_pa: ambient_pressure,
         temp_c_bmp: bmp_temp_c
-      })
-      |> Map.merge(%{
-        lux_reading: lux_reading,
-        visible_light: zero,
-        infrared_light: one
       })
 
     # send out to pub sub or telemetry

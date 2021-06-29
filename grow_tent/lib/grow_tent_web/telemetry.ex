@@ -52,7 +52,7 @@ defmodule GrowTentWeb.Telemetry do
   def prometheus_metrics do
     [
       last_value("grow_tent.sensors.temp_c"),
-      last_value("grow_tent.sensors.bmp_temp_c"),
+      last_value("grow_tent.sensors.temp_c_bmp"),
       last_value("grow_tent.sensors.temp_f"),
       last_value("grow_tent.sensors.c02_ppm"),
       last_value("grow_tent.sensors.rh"),
