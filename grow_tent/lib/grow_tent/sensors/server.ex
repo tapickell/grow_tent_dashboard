@@ -226,21 +226,22 @@ defmodule GrowTent.Sensors.Server do
      %{
        altitude_m: altitude,
        pressure_pa: ambient_pressure,
-       temperature_c: bmp_temp_c
+       temperature_c: temp_c_bmp
      }} = BMP3XX.measure(bmp)
 
-    %{temp_c: temp_c} = scd_measurements = Scd30.read_measurement(scd)
+    %{temp_c: temp_c, rh: rh} = scd_measurements = Scd30.read_measurement(scd)
 
     measurements =
       scd_measurements
       |> Map.merge(%{
-        temp_f: Units.celcius_to_f(temp_c)
+        temp_f: Units.celcius_to_f(temp_c),
+        dew_point_f: Units.celcius_to_f(Units.dew_point(temp_c, rh))
       })
       |> Map.merge(%{
         pressure_inhg: Units.pascal_to_inhg(ambient_pressure),
         altitude_m: altitude,
         pressure_pa: ambient_pressure,
-        temp_c_bmp: bmp_temp_c
+        temp_c_bmp: temp_c_bmp
       })
 
     # send out to pub sub or telemetry
