@@ -11,6 +11,10 @@ config :grow_tent, GrowTentWeb.Endpoint,
   pubsub_server: GrowTent.PubSub,
   live_view: [signing_salt: "Qh5bwya6"]
 
+config :grow_tent, GrowTentWeb.Telemetry, device_name: System.get_env("DEVICE_NAME", "tent_1")
+
+config :grow_tent, GrowTent.Sensors, sensors: System.get_env("SENSORS", "")
+
 config :shoehorn,
   init: [:nerves_runtime, :nerves_pack],
   app: Mix.Project.config()[:app]

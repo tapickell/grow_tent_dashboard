@@ -24,6 +24,24 @@ defmodule GrowTent.Sensors.Tsl2951 do
     I2cServer.start_link(bus_name: bus_name, bus_address: address)
   end
 
+  def init(lux) do
+    if online?(lux) do
+      enable(lux)
+      :ok
+    end
+  end
+
+  def measure(lux) do
+    raw_luminosity(lux)
+  end
+
+  def transform({zero, one}) do
+    %{
+      visible_light: zero,
+      infrared_light: one
+    }
+  end
+
   def online?(lux) do
     {:ok, <<dev_id::integer>>} = I2cServer.write_read(lux, @command_bit ||| @registerdeviceid, 1)
     dev_id == @device_id
@@ -58,8 +76,8 @@ defmodule GrowTent.Sensors.Tsl2951 do
 
     if chan_zero >= @max_counts or chan_one >= @max_counts do
       _ = Logger.warn("Overflow reading light channels!, Try to reduce the gain of the sensor")
-      chan_zero = chan_zero * 0.1
-      chan_one = chan_one * 0.1
+      # chan_zero = chan_zero * 0.1
+      # chan_one = chan_one * 0.1
     end
 
     # Calculate lux using same equation as Arduino library:

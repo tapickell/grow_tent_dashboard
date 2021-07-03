@@ -1,6 +1,8 @@
 defmodule GrowTent.Sensors.Scd30 do
   require Logger
 
+  alias GrowTent.Utils.Units
+
   @default_address 0x61
   @cmd_continuous_measurement <<0x00, 0x10>>
   @cmd_set_measurement_interval <<0x46, 0x00>>
@@ -34,11 +36,21 @@ defmodule GrowTent.Sensors.Scd30 do
     :ok
   end
 
-  def read_measurement(scd) do
+  def measure(scd) do
     {:ok, read_measurement} = I2cServer.write_read(scd, @cmd_read_measurement, 19)
     # {:error, :i2c_nak}
 
     convert_raw_measurements(read_measurement)
+  end
+
+  def transorm(measurements) do
+    %{temp_c: temp_c, rh: rh} = measurements
+
+    measurements
+    |> Map.merge(%{
+      temp_f: Units.celcius_to_f(temp_c),
+      dew_point_f: Units.celcius_to_f(Units.dew_point(temp_c, rh))
+    })
   end
 
   def set_ambient_pressure(scd, ambient_pressure) do
