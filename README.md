@@ -21,10 +21,10 @@ may have a c02 sensor (scd30), while the other could have a simpler and cheaper
 temp/rh sensor. Also something with  soil_stick does not need calculate VPD with temp and rh if it
 is in a tent that has other devices that can.
 The curent list of supported sensors are
-* `scd30` Scd30 Temp/Rh/C02 (SCD30)[https://learn.adafruit.com/adafruit-scd30/python-circuitpython]
-* `bmp3` Bmp3XX Altitude/Ambient Pressure/Temp (BMP3XX)[https://www.adafruit.com/product/3966]
-* `soil_stick` Soil Stick Soil Moisture/Temp (In Development) (Soil Stick Stemma)[https://learn.adafruit.com/adafruit-stemma-soil-sensor-i2c-capacitive-moisture-sensor/python-circuitpython-test]
-* `tsl2951` Tsl2951 Lux/Raw Luminosity (This sensor is currently not 100% and can crash when lights go out) (TSL2951)[https://www.adafruit.com/product/1980]
+* `scd30` Scd30 Temp/Rh/C02 [SCD30](https://learn.adafruit.com/adafruit-scd30/python-circuitpython)
+* `bmp3` Bmp3XX Altitude/Ambient Pressure/Temp [BMP3XX](https://www.adafruit.com/product/3966)
+* `soil_stick` Soil Stick Soil Moisture/Temp (In Development) [Soil Stick Stemma](https://learn.adafruit.com/adafruit-stemma-soil-sensor-i2c-capacitive-moisture-sensor/python-circuitpython-test)
+* `tsl2951` Tsl2951 Lux/Raw Luminosity (This sensor is currently not 100% and can crash when lights go out) [TSL2951](https://www.adafruit.com/product/1980)
 
 
 ## Building and Burning Firmware
@@ -84,7 +84,7 @@ The Tsl2951 Lux is extra but would be nice if your trying to dial in lighting
 for maximum yeild. The sensor is unstable and needs more error handling in the code.
 
 Really, just a simple Temp/Rh sensor over I2C is fine.
-Something like this for $7 (SHTC3)[https://www.adafruit.com/product/4636]
+Something like this for $7 [SHTC3](https://www.adafruit.com/product/4636)
 With this you can calculate the VPD and dew point to some accuracy.
 The Temp, Rh and VPD are the things that matter the most.
 
