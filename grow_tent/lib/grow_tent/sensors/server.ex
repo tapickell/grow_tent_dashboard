@@ -4,7 +4,7 @@ defmodule GrowTent.Sensors.Server do
   require Logger
 
   alias Phoenix.PubSub
-  alias GrowTent.Sensors.{Bmp3, Control, Scd30}
+  alias GrowTent.Sensors.Control
 
   @moduledoc """
   """
@@ -52,11 +52,12 @@ defmodule GrowTent.Sensors.Server do
     measurements = Control.measure_all(sensor_pids)
 
     # send out to pub sub or telemetry
-    :telemetry.execute([:grow_tent, :sensors], measurements, %{})
+    device_name = GrowTentWeb.Telemetry.device_name()
+    :telemetry.execute([:"grow_#{device_name}", :sensors], measurements, %{})
 
     PubSub.broadcast(
       GrowTent.PubSub,
-      "sensors:scd30",
+      "sensors:server",
       {:new_data, Map.put(measurements, :timestamp, DateTime.utc_now())}
     )
 

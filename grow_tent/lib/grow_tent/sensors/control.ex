@@ -1,15 +1,10 @@
 defmodule GrowTent.Sensors.Control do
   alias GrowTent.Sensors.{Bmp3, Scd30, SoilStick, Tsl2951}
 
-  @known_sensors = ["scd30", "tsl2951", "bmp3", "soil_stick"]
+  @known_sensors ["scd30", "tsl2951", "bmp3", "soil_stick"]
 
-  @sensors =
-    Application.compile_env!(:grow_tent, GrowTent.Sensors)[:sensors]
-    |> String.split(",")
-    |> Enum.filter(&(&1 in @known_sensors))
-
-  @sensor_modules = %{
-    "bmo3" => Bmp3,
+  @sensor_modules %{
+    "bmp3" => Bmp3,
     "scd30" => Scd30,
     "soil_stick" => SoilStick,
     "tsl2951" => Tsl2951
@@ -18,7 +13,7 @@ defmodule GrowTent.Sensors.Control do
   def start_all(bus_name) do
     mods =
       @sensor_modules
-      |> Enum.filter(fn {k, _v} -> k in @sensors end)
+      |> Enum.filter(fn {k, _v} -> k in sensors() end)
       |> Enum.map(fn {k, mod} ->
         {:ok, pid} = mod.start_link(bus_name)
         {mod, pid}
@@ -61,5 +56,11 @@ defmodule GrowTent.Sensors.Control do
       altitude_m: nil,
       pressure_pa: nil
     }
+  end
+
+  def sensors do
+    Application.get_env(:grow_tent, GrowTent.Sensors)[:sensors]
+    |> String.split(",")
+    |> Enum.filter(&(&1 in @known_sensors))
   end
 end

@@ -43,7 +43,7 @@ defmodule GrowTent.Sensors.Scd30 do
     convert_raw_measurements(read_measurement)
   end
 
-  def transorm(measurements) do
+  def transform(measurements) do
     %{temp_c: temp_c, rh: rh} = measurements
 
     measurements

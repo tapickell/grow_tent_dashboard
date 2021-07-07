@@ -2,8 +2,6 @@ defmodule GrowTentWeb.Telemetry do
   use Supervisor
   import Telemetry.Metrics
 
-  @device_name Application.compile_env!(:grow_tent, GrowTentWeb.Telemetry)[:device_name]
-
   def start_link(arg) do
     Supervisor.start_link(__MODULE__, arg, name: __MODULE__)
   end
@@ -37,32 +35,36 @@ defmodule GrowTentWeb.Telemetry do
       summary("vm.total_run_queue_lengths.total"),
       summary("vm.total_run_queue_lengths.cpu"),
       summary("vm.total_run_queue_lengths.io"),
-      summary("grow_tent.#{@device_name}.sensors.temp_c"),
-      summary("grow_tent.#{@device_name}.sensors.temp_c_bmp"),
-      summary("grow_tent.#{@device_name}.sensors.temp_f"),
-      summary("grow_tent.#{@device_name}.sensors.dew_point_f"),
-      summary("grow_tent.#{@device_name}.sensors.c02_ppm"),
-      summary("grow_tent.#{@device_name}.sensors.rh"),
-      summary("grow_tent.#{@device_name}.sensors.avpd"),
-      summary("grow_tent.#{@device_name}.sensors.lvpd"),
-      summary("grow_tent.#{@device_name}.sensors.pressure_inhg"),
-      summary("grow_tent.#{@device_name}.sensors.pressure_pa")
+      summary("grow_#{device_name()}.sensors.temp_c"),
+      summary("grow_#{device_name()}.sensors.temp_c_bmp"),
+      summary("grow_#{device_name()}.sensors.temp_f"),
+      summary("grow_#{device_name()}.sensors.dew_point_f"),
+      summary("grow_#{device_name()}.sensors.c02_ppm"),
+      summary("grow_#{device_name()}.sensors.rh"),
+      summary("grow_#{device_name()}.sensors.avpd"),
+      summary("grow_#{device_name()}.sensors.lvpd"),
+      summary("grow_#{device_name()}.sensors.pressure_inhg"),
+      summary("grow_#{device_name()}.sensors.pressure_pa")
     ]
   end
 
   def prometheus_metrics do
     [
-      last_value("grow_tent.#{@device_name}.sensors.temp_c"),
-      last_value("grow_tent.#{@device_name}.sensors.temp_c_bmp"),
-      last_value("grow_tent.#{@device_name}.sensors.temp_f"),
-      last_value("grow_tent.#{@device_name}.sensors.dew_point_f"),
-      last_value("grow_tent.#{@device_name}.sensors.c02_ppm"),
-      last_value("grow_tent.#{@device_name}.sensors.rh"),
-      last_value("grow_tent.#{@device_name}.sensors.avpd"),
-      last_value("grow_tent.#{@device_name}.sensors.lvpd"),
-      last_value("grow_tent.#{@device_name}.sensors.pressure_inhg"),
-      last_value("grow_tent.#{@device_name}.sensors.pressure_pa")
+      last_value("grow_#{device_name()}.sensors.temp_c"),
+      last_value("grow_#{device_name()}.sensors.temp_c_bmp"),
+      last_value("grow_#{device_name()}.sensors.temp_f"),
+      last_value("grow_#{device_name()}.sensors.dew_point_f"),
+      last_value("grow_#{device_name()}.sensors.c02_ppm"),
+      last_value("grow_#{device_name()}.sensors.rh"),
+      last_value("grow_#{device_name()}.sensors.avpd"),
+      last_value("grow_#{device_name()}.sensors.lvpd"),
+      last_value("grow_#{device_name()}.sensors.pressure_inhg"),
+      last_value("grow_#{device_name()}.sensors.pressure_pa")
     ]
+  end
+
+  def device_name do
+    Application.get_env(:grow_tent, GrowTentWeb.Telemetry)[:device_name]
   end
 
   defp periodic_measurements do

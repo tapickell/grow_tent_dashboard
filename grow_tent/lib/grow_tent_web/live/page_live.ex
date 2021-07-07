@@ -5,7 +5,7 @@ defmodule GrowTentWeb.PageLive do
   @impl true
   def mount(_params, _session, socket) do
     if connected?(socket) do
-      Endpoint.subscribe("sensors:scd30")
+      Endpoint.subscribe("sensors:server")
     end
 
     initial_sensor_data = %{
@@ -21,7 +21,13 @@ defmodule GrowTentWeb.PageLive do
       pressure_pa: 0
     }
 
-    {:ok, assign(socket, sensor_data: initial_sensor_data)}
+    socket =
+      socket
+      |> assign(device_name: GrowTentWeb.Telemetry.device_name())
+      |> assign(active_sensors: GrowTent.Sensors.Control.sensors())
+      |> assign(sensor_data: initial_sensor_data)
+
+    {:ok, socket}
   end
 
   @impl true

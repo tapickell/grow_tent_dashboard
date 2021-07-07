@@ -1,4 +1,99 @@
-# Hello Phoenix
+# Nerves Based Grow Tent Firmware and UI 
+this is a poncho application with the Phoenix application in `/grow_tent`
+and the Nerves application in `/grow_tent_firmware`
+the software is built and deployed from the firmware directory
+
+## Env Vars
+In order to make this firmware work on multiple configurations for different devices
+currently it takes some vars during the build burn stage to tell the system 
+what hostname to use and what sensors are on the board and should be enabled 
+and communicated with.
+
+`DEVICE_NAME` is used for the hostname `device_name.local`
+and also used for the metrics `grow_device_name.sensors.temp_c` reporting
+via the Prometheus `device_name.local:9568/metrics` endpoint.
+
+`SENSORS` is used to define what sensors should be active and communicated with
+on the device. This is passed in as a csv string `SENSORS=scd30,bmp3,tsl2951,soil_stick`
+Not all devices need to have the same sensors.
+ie. If you have 2 tents in the same room, only one of those tents 
+may have a c02 sensor (scd30), while the other could have a simpler and cheaper
+temp/rh sensor. Also something with  soil_stick does not need calculate VPD with temp and rh if it
+is in a tent that has other devices that can.
+The curent list of supported sensors are
+* `scd30` Scd30 Temp/Rh/C02 (SCD30)[https://learn.adafruit.com/adafruit-scd30/python-circuitpython]
+* `bmp3` Bmp3XX Altitude/Ambient Pressure/Temp (BMP3XX)[https://www.adafruit.com/product/3966]
+* `soil_stick` Soil Stick Soil Moisture/Temp (In Development) (Soil Stick Stemma)[https://learn.adafruit.com/adafruit-stemma-soil-sensor-i2c-capacitive-moisture-sensor/python-circuitpython-test]
+* `tsl2951` Tsl2951 Lux/Raw Luminosity (This sensor is currently not 100% and can crash when lights go out) (TSL2951)[https://www.adafruit.com/product/1980]
+
+
+## Building and Burning Firmware
+The first burn to get the firmware onto your device via sd card
+```
+# 1) prep ui application
+cd grow_tent
+mix deps.get # if not done yet
+npm install --prefix assets --production
+npm run deploy --prefix assets
+mix phx.digest
+
+# 2) build / burn firmware
+cd ../grow_tent_firmware
+export MIX_TARGET=rpi3 # or whatever device your using
+# If you're using WiFi:
+# export NERVES_NETWORK_SSID=your_wifi_name
+# export NERVES_NETWORK_PSK=your_wifi_password
+DEVICE_NAME=tent1 SENSORS=scd30,bmp3 mix firmware.burn -d /dev/yoursdcard
+# once burn is finished pop sd card into device and boot
+# wait like 3 minutes or if bored ping tent1.local til it comes online
+ssh tent1.local  # this gives you an iex session into the device
+```
+
+After the initial burn an run update using the upload script
+```
+# 1) prep ui application
+cd grow_tent
+mix deps.get # if not done yet
+npm install --prefix assets --production
+npm run deploy --prefix assets
+mix phx.digest
+
+# 2) build / burn firmware
+cd ../grow_tent_firmware
+export MIX_TARGET=rpi3 # or whatever device your using
+# If you're using WiFi:
+# export NERVES_NETWORK_SSID=your_wifi_name
+# export NERVES_NETWORK_PSK=your_wifi_password
+DEVICE_NAME=tent1 SENSORS=scd30,bmp3 mix firmware
+./upload.sh tent1.local _build/rpi3_dev/nerves/images/grow_tent_firmware.fw
+# wait like 3 minutes or if bored ping tent1.local til it comes online
+ssh tent1.local  # this gives you an iex session into the device
+```
+
+
+# A Note About Sensors
+After testing this for a while in a couple of tents I realized that alot of these sensors
+are optional for what one really needs to dial in an indoor grow environment.
+Having C02 readings is nice but the sensor/breakout is almost $60 usd.
+Unless you plan on pumping up the C02 levels, it is optional.
+If you do plan on pumping the C02 levels you should get a controller
+anyways since C02 in too high of a concentration in an indoor space is not fun.
+The Altitude / Pressure sensor is not really needed. I wanted to test differences 
+in the C02 readings by starting the sensor with pressure readings.
+The Tsl2951 Lux is extra but would be nice if your trying to dial in lighting
+for maximum yeild. The sensor is unstable and needs more error handling in the code.
+
+Really, just a simple Temp/Rh sensor over I2C is fine.
+Something like this for $7 (SHTC3)[https://www.adafruit.com/product/4636]
+With this you can calculate the VPD and dew point to some accuracy.
+The Temp, Rh and VPD are the things that matter the most.
+
+This may not be the long term solution but is working for now.
+I think it may be better to have differnt configuration files in the future
+that one could define for each deployment setup.
+
+
+# Standard Nerves Phx Starter Docs
 
 This example demonstrates a basic poncho project for deploying a [Phoenix
 Framework]-based application to a Nerves device. A "poncho project" is similar

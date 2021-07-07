@@ -18,7 +18,7 @@ defmodule GrowTent.Sensors.Bmp3 do
     measurements
   end
 
-  def transorm(measurements) do
+  def transform(measurements) do
     %{
       altitude_m: altitude,
       pressure_pa: ambient_pressure,

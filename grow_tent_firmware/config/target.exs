@@ -11,7 +11,7 @@ config :grow_tent, GrowTentWeb.Endpoint,
   pubsub_server: GrowTent.PubSub,
   live_view: [signing_salt: "Qh5bwya6"]
 
-config :grow_tent, GrowTentWeb.Telemetry, device_name: System.get_env("DEVICE_NAME", "tent_1")
+config :grow_tent, GrowTentWeb.Telemetry, device_name: System.get_env("DEVICE_NAME", "tent1")
 
 config :grow_tent, GrowTent.Sensors, sensors: System.get_env("SENSORS", "")
 
@@ -81,16 +81,7 @@ config :vintage_net,
            }
          ]
        },
-       # ipv4: %{method: :dhcp}
-       ipv4: %{
-         address: {192, 168, 86, 91},
-         gateway: {192, 168, 86, 1},
-         prefix_length: 24,
-         name_servers: [
-           {1, 1, 1, 1}
-         ],
-         method: :static
-       }
+       ipv4: %{method: :dhcp}
      }}
   ]
 
@@ -100,8 +91,7 @@ config :mdns_lite,
   # is "nerves-<4 digit serial#>.local".  mdns_lite also advertises
   # "nerves.local" for convenience. If more than one Nerves device is on the
   # network, delete "nerves" from the list.
-
-  host: [:hostname, "nerves"],
+  host: [:hostname, System.get_env("DEVICE_NAME", "tent1")],
   ttl: 120,
 
   # Advertise the following services over mDNS.

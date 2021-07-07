@@ -1,5 +1,15 @@
 <section class="phx-hero">
-  <h1><%= gettext "Welcome to %{name}!", name: "GrowTent Dashboard" %></h1>
+  <h1><%= gettext "Welcome to %{name}!", name: @device_name <> " Dashboard" %></h1>
+  <h2 class="title is-4">Active Sensors:</h2>
+  <%= if @active_sensors != [] do %>
+    <ul>
+    <%= for sensor <- @active_sensors do %>
+      <li><%= sensor %></li>
+    <% end %>
+    <ul>
+  <% else %>
+    <h2 class="font-medium">NO ACTIVE SENSORS</h2>
+  <% end %>
   <p>Peace of mind from seed to harvest</p>
 </section>
 <div class="section">
