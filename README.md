@@ -93,6 +93,22 @@ I think it may be better to have differnt configuration files in the future
 that one could define for each deployment setup.
 
 
+# Dashboard
+If you have gotten this far and burned this to a device and are wondering,
+"Hey Pickle, where the hell is the Dashboard part of this Grow Tent Dashboard?"
+I am glad you asked. 
+So this Nerves applicaiton with Phoenix and LiveView (prbbly not needed now)
+just serves up a prometheus style `/metrics` endpoint.
+All the telemetry metrics selected will be available to scrape from there.
+Personally I run InfluxDB as my dashboard and it runs in Docker on another machine
+on my local network. I choose InfluxDB b/c it was dead simple to get going and 
+I was able to get a dasboard built out in under an hour without having to pay for a service.
+Other things like this may be better but it is up to the end user what actual dasboard
+to use.
+```
+sudo docker run -d --name influxdb -p 8086:8086 -v  /tmp/testdata/influx:/root/.influxdbv2 --network influxdb-telegraf-net quay.io/influxdb/influxdb:v2.0.3
+```
+
 # Standard Nerves Phx Starter Docs
 
 This example demonstrates a basic poncho project for deploying a [Phoenix
