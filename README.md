@@ -114,6 +114,15 @@ to use.
 ```
 sudo docker run -d --name influxdb -p 8086:8086 -v  /tmp/testdata/influx:/root/.influxdbv2 --network influxdb-telegraf-net quay.io/influxdb/influxdb:v2.0.3
 ```
+* Go to `http://localhost:8086/`
+* Create Buckets for each `DEVICE_NAME`
+![Create Buckets](https://github.com/tapickell/grow_tent_dashboard/blob/master/create_buckets.png?raw=true)
+* Setup Scrapers for each device by ip address (I tried using the `tent1.local` but that id not work :shrug:)
+![Scraper Setup](https://github.com/tapickell/grow_tent_dashboard/blob/master/scraper_setup.png?raw=true)
+* Create Dashboard and graphs for the sensor data
+![Add Graphs](https://github.com/tapickell/grow_tent_dashboard/blob/master/add_graphs.png?raw=true)
+* Dashboard With Graphs
+![Dashboard](https://github.com/tapickell/grow_tent_dashboard/blob/master/dashboard.png?raw=true)
 
 # Standard Nerves Phx Starter Docs
 
