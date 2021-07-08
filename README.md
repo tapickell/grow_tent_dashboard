@@ -3,6 +3,12 @@ this is a poncho application with the Phoenix application in `/grow_tent`
 and the Nerves application in `/grow_tent_firmware`
 the software is built and deployed from the firmware directory
 
+# Getting Started
+If you have not built anything with Nerves there is some initial setup to get things working
+Follow the steps here that define all the things you need for each OS to be able to 
+get to the end goal of installing `nerves_bootstrap`
+[Nerves Installation](https://hexdocs.pm/nerves/installation.html#content)
+
 ## Env Vars
 In order to make this firmware work on multiple configurations for different devices
 currently it takes some vars during the build burn stage to tell the system 
