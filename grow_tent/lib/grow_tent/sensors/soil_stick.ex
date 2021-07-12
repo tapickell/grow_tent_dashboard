@@ -32,12 +32,13 @@ defmodule GrowTent.Sensors.SoilStick do
   end
 
   def transform(measurements) do
-    %{temp_c: temp_c} = measurements
+    %{moisture: moisture, temp_c: temp_c} = measurements
 
-    measurements
-    |> Map.merge(%{
-      temp_f: Units.celcius_to_f(temp_c)
-    })
+    %{
+      moisture_soil_stick: moisture,
+      temp_f_soil_stick: Units.celcius_to_f(temp_c),
+      temp_c_soil_stick: temp_c
+    }
   end
 
   defp convert_raw_measurements(moisture_reading, temp_reading) do

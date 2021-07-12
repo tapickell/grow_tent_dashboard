@@ -52,7 +52,10 @@ defmodule GrowTentWeb.Telemetry do
     [
       last_value("grow_#{device_name()}.sensors.temp_c"),
       last_value("grow_#{device_name()}.sensors.temp_c_bmp"),
+      last_value("grow_#{device_name()}.sensors.temp_c_soil_stick"),
       last_value("grow_#{device_name()}.sensors.temp_f"),
+      last_value("grow_#{device_name()}.sensors.temp_f_soil_stick"),
+      last_value("grow_#{device_name()}.sensors.moisture_soil_stick"),
       last_value("grow_#{device_name()}.sensors.dew_point_f"),
       last_value("grow_#{device_name()}.sensors.c02_ppm"),
       last_value("grow_#{device_name()}.sensors.rh"),
