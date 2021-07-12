@@ -171,4 +171,67 @@
   CRC(0xBEEF) = 0x92
 
 
+
+  iex(4)> addr = 0x36                            
+  iex(5)> l = I2cServer.start_link(bus_name: "i2c-1", bus_address: addr)
+  {:ok, #PID<0.2245.0>}
+  iex(7)> base = 0x0F
+  15      
+  iex(8)> offset = 0x10
+  16      
+    
+  # OPEN AIR READING
+  iex(11)> {:ok, reading} = I2cServer.write_read(pid, <<0x0F>> <> <<0x10>>, 2)
+  {:ok, <<1, 114>>}
+  iex(12)> reading
+  <<1, 114>>
+  iex(13)> {:ok, reading} = I2cServer.write_read(pid, <<0x0F>> <> <<0x10>>, 2)
+  {:ok, <<1, 118>>}
+  iex(49)> <<open_air::integer-size(16)>> = <<1, 69>>
+  <<1, 69>>
+  iex(50)> open_air
+  325   
+
+  # DRY READING
+  iex(17)> {:ok, reading} = I2cServer.write_read(pid, <<0x0F>> <> <<0x10>>, 2)
+  {:ok, <<2, 96>>}
+  iex(45)> <<dry::integer-size(16)>> = <<2, 99>>
+  <<2, 99>>
+  iex(46)> dry
+  611     
+
+  # WET READING
+  iex(36)> {:ok, reading} = I2cServer.write_read(pid, <<0x0F>> <> <<0x10>>, 2)
+  {:ok, <<2, 191>>}
+  iex(43)> <<moist::integer-size(16)>> = reading
+  <<2, 190>>
+  iex(44)> moist
+  702     
+
+  # REALLY WET READING
+  iex(56)> {:ok, reading} = I2cServer.write_read(pid, <<0x0F>> <> <<0x10>>, 2)
+  {:ok, <<2, 205>>}
+  iex(57)> <<too_moist::integer-size(16)>> = reading                          
+  <<2, 205>>
+  iex(58)> too_moist 
+  717
+  iex(60)> {:ok, reading} = I2cServer.write_read(pid, <<0x0F>> <> <<0x10>>, 2)
+  {:ok, <<3, 1>>}
+  iex(61)> <<too_moist::integer-size(16)>> = reading                          
+  <<3, 1>>
+  iex(62)> too_moist                                                          
+  769
+
+  # TEMP READING avg offset -4 C
+  iex(192)> c = 0.00001525878
+  1.525878e-5
+  iex(201)> {:ok, reading} = I2cServer.write_read(pid, <<0x00>> <> <<0x04>>, 4)
+  {:ok, <<0, 31, 206, 194>>}
+  iex(202)> <<temp::integer-size(32)>> = reading                               
+  <<0, 31, 206, 194>>
+  iex(218)> temp_w_offset = (temp * c) - 4
+  27.80762881388
+  iex(219)> GrowTent.Utils.Units.celcius_to_f temp_w_offset
+  82.053731864984
+
 """

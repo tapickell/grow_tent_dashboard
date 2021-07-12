@@ -3,6 +3,7 @@ defmodule GrowTent.Utils.Units do
 
   @const_a 17.27
   @const_b 237.3
+  @const_c 0.00001525878
 
   def pascal_to_mbar(pascal) when is_float(pascal) do
     (pascal * 0.01) |> floor()
@@ -10,6 +11,10 @@ defmodule GrowTent.Utils.Units do
 
   def pascal_to_inhg(pascal) when is_float(pascal) do
     (pascal * 0.00029529983071445) |> floor()
+  end
+
+  def raw_to_c(raw, offset \\ 4) do
+    raw * @const_c - offset
   end
 
   def celcius_to_f(c) do
@@ -35,7 +40,7 @@ defmodule GrowTent.Utils.Units do
   end
 
   def dew_point_approximation(deg_c, rh) do
-    _ = Logger.info("calculating dew point using approximation")
+    _ = Logger.warn("calculating dew point using approximation")
     deg_c - (100 - rh) / 5
   end
 end
