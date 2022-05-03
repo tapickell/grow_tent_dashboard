@@ -31,28 +31,28 @@ defmodule GrowTentFirmware.MixProject do
   defp deps do
     [
       # Dependencies for all targets
-      {:nerves, "~> 1.7.0", runtime: false},
-      {:shoehorn, "~> 0.7.0"},
-      {:ring_logger, "~> 0.8.1"},
+      {:nerves, "~> 1.7.16", runtime: false},
+      {:shoehorn, "~> 0.8.0"},
+      {:ring_logger, "~> 0.8.3"},
       {:toolshed, "~> 0.2.13"},
       {:circuits_i2c, "~> 0.3.8"},
       {:bmp3xx, "~> 0.1.2"},
       {:grow_tent, path: "../grow_tent", targets: @all_targets, env: Mix.env()},
 
       # Dependencies for all targets except :host
-      {:nerves_runtime, "~> 0.11.3", targets: @all_targets},
-      {:nerves_pack, "~> 0.4.0", targets: @all_targets},
+      {:nerves_runtime, "~> 0.11.6", targets: @all_targets},
+      {:nerves_pack, "~> 0.6.0", targets: @all_targets},
 
       # Dependencies for specific targets
-      {:nerves_system_rpi, "~> 1.13", runtime: false, targets: :rpi},
-      {:nerves_system_rpi0, "~> 1.13", runtime: false, targets: :rpi0},
-      {:nerves_system_rpi2, "~> 1.13", runtime: false, targets: :rpi2},
-      {:nerves_system_rpi3, "~> 1.13", runtime: false, targets: :rpi3},
-      {:nerves_system_rpi3a, "~> 1.13", runtime: false, targets: :rpi3a},
-      {:nerves_system_rpi4, "~> 1.13", runtime: false, targets: :rpi4},
-      {:nerves_system_bbb, "~> 2.8", runtime: false, targets: :bbb},
-      {:nerves_system_osd32mp1, "~> 0.4", runtime: false, targets: :osd32mp1},
-      {:nerves_system_x86_64, "~> 1.13", runtime: false, targets: :x86_64}
+      {:nerves_system_rpi, "~> 1.18", runtime: false, targets: :rpi},
+      {:nerves_system_rpi0, "~> 1.18", runtime: false, targets: :rpi0},
+      {:nerves_system_rpi2, "~> 1.18", runtime: false, targets: :rpi2},
+      {:nerves_system_rpi3, "~> 1.18", runtime: false, targets: :rpi3},
+      {:nerves_system_rpi3a, "~> 1.18", runtime: false, targets: :rpi3a},
+      {:nerves_system_rpi4, "~> 1.18", runtime: false, targets: :rpi4},
+      {:nerves_system_bbb, "~> 2.13", runtime: false, targets: :bbb},
+      {:nerves_system_osd32mp1, "~> 0.9", runtime: false, targets: :osd32mp1},
+      {:nerves_system_x86_64, "~> 1.18", runtime: false, targets: :x86_64}
     ]
   end
 
