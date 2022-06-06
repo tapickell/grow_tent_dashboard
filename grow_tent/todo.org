@@ -118,8 +118,6 @@
   {:ok, <<25>>}
   iex(51)> {:ok, <<chan_one::integer>>} = I2cServer.write_read(lux, 0xA0 ||| 0x16, 1) 
   {:ok, <<5>>}
-  iex(52)> zhan_zero
-  ** (CompileError) iex:52: undefined function zhan_zero/0
 
   iex(52)> chan_zero
   25

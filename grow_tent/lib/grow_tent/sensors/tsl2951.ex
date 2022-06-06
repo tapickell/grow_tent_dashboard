@@ -70,8 +70,9 @@ defmodule GrowTent.Sensors.Tsl2951 do
   # TODO currently we are assuming system is using 100ms integration time
   # if this changes these figures will be off.
   # When adding ability to set gain will need to add fucntion to get atime numbers
-  def lux(lux) do
-    {chan_zero, chan_one} = raw_luminosity(lux)
+  def lux({0, _chan_one}), do: 0
+
+  def lux({chan_zero, chan_one}) do
     atime = 100.0 * @integration_time + 100.0
 
     if chan_zero >= @max_counts or chan_one >= @max_counts do
@@ -92,19 +93,6 @@ defmodule GrowTent.Sensors.Tsl2951 do
     # new calculation
     # lux = (((float)ch0 - (float)ch1)) * (1.0F - ((float)ch1 / (float)ch0)) / cpl;
     # ** (ArithmeticError) bad argument in arithmetic expression
-    try do
-      (chan_zero - chan_one) * (again - chan_one / chan_zero) / cpl
-    rescue
-      error ->
-        _ = Logger.error(error)
-        _ = Logger.error("Lux Calc Error")
-
-        _ =
-          Logger.error(
-            "(#{chan_zero} - #{chan_one}) * (#{again} - #{chan_one} / #{chan_zero}) / #{cpl}"
-          )
-
-        0
-    end
+    (chan_zero - chan_one) * (again - chan_one / chan_zero) / cpl
   end
 end
